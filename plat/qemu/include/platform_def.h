@@ -81,6 +81,9 @@
 #define SEC_DRAM_BASE			0x0e100000
 #define SEC_DRAM_SIZE			0x00f00000
 
+#define TPM_CRB_BASE			0x7ddf0000
+#define TPM_CRB_SIZE			0x00010000
+
 /* Load pageable part of OP-TEE 2MB above secure DRAM base */
 #define QEMU_OPTEE_PAGEABLE_LOAD_BASE	(SEC_DRAM_BASE + 0x00200000)
 #define QEMU_OPTEE_PAGEABLE_LOAD_SIZE	0x00400000
