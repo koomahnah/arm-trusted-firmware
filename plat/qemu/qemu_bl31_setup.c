@@ -64,6 +64,7 @@ void bl31_early_platform_setup2(u_register_t arg0, u_register_t arg1,
 	if (!bl33_image_ep_info.pc)
 		panic();
 }
+void init_tpm();
 
 void bl31_plat_arch_setup(void)
 {
@@ -71,6 +72,7 @@ void bl31_plat_arch_setup(void)
 			      BL_CODE_BASE, BL_CODE_END,
 			      BL_RO_DATA_BASE, BL_RO_DATA_END,
 			      BL_COHERENT_RAM_BASE, BL_COHERENT_RAM_END);
+	init_tpm();
 }
 
 /******************************************************************************

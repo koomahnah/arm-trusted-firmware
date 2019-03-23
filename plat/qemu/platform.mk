@@ -136,6 +136,8 @@ BL31_SOURCES		+=	lib/cpus/aarch64/aem_generic.S		\
 				plat/qemu/qemu_bl31_setup.c
 endif
 
+BL31_SOURCES		+=	drivers/tpm/tpm.c
+
 # Add the build options to pack Trusted OS Extra1 and Trusted OS Extra2 images
 # in the FIP if the platform requires.
 ifneq ($(BL32_EXTRA1),)
