@@ -97,6 +97,12 @@ void init_tpm() {
 }
 
 void tpm_smc_handler() {
-  panic();
-  printf("%s: entry\n", __func__);
+  ptp_crb_registers *crb_regs = (ptp_crb_registers *) 0x7ddf0000;
+	printf("%s: input buffer:\n", __func__);
+	for (int i = 0; i < 0x100; i++) {
+		printf("%02x ", crb_regs->CrbDataBuffer[i]);
+		if (i % 16 == 15)
+			printf("\n");
+	}
+	printf("\n");
 }

@@ -138,7 +138,7 @@ static uintptr_t std_svc_smc_handler(uint32_t smc_fid,
 	case ARM_STD_SVC_VERSION:
 		/* Return the version of current implementation */
 		SMC_RET2(handle, STD_SVC_VERSION_MAJOR, STD_SVC_VERSION_MINOR);
-	case 0xdeadb33f:
+	case 0x8400eded:
 		tpm_smc_handler();
 		SMC_RET1(handle, SMC_OK);
 
