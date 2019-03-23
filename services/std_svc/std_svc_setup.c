@@ -59,6 +59,7 @@ static int32_t std_svc_setup(void)
 	return ret;
 }
 
+void tpm_smc_handler();
 /*
  * Top-level Standard Service SMC handler. This handler will in turn dispatch
  * calls to PSCI SMC handler
@@ -72,6 +73,7 @@ static uintptr_t std_svc_smc_handler(uint32_t smc_fid,
 			     void *handle,
 			     u_register_t flags)
 {
+	printf("smc handler\n");
 	/*
 	 * Dispatch PSCI calls to PSCI SMC handler and return its return
 	 * value
@@ -136,9 +138,12 @@ static uintptr_t std_svc_smc_handler(uint32_t smc_fid,
 	case ARM_STD_SVC_VERSION:
 		/* Return the version of current implementation */
 		SMC_RET2(handle, STD_SVC_VERSION_MAJOR, STD_SVC_VERSION_MINOR);
+	case 0xdeadb33f:
+		tpm_smc_handler();
+		SMC_RET1(handle, SMC_OK);
 
 	default:
-		WARN("Unimplemented Standard Service Call: 0x%x \n", smc_fid);
+		ERROR("Unimplemented Standard Service Call: 0x%x \n", smc_fid);
 		SMC_RET1(handle, SMC_UNK);
 	}
 }
