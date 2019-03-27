@@ -1,10 +1,12 @@
-#ifndef _TPM_PRIV_H_
-#define _TPM_PRIV_H_
+#ifndef _TPM_CRB_H_
+#define _TPM_CRN_H_
+
+#include <stdint.h>
+
+#define TPM_LOCALITY_GRANTED 0x1
 
 #pragma pack (1)
-//
-// Register set map as specified in PTP specification Chapter 5
-//
+
 typedef struct {
   ///
   /// Used to determine current state of Locality of the TPM.
@@ -78,8 +80,10 @@ typedef struct {
   ///
   /// Command/Response Data may be defined as large as 3968 (0xF80).
   ///
-  uint8_t                             CrbDataBuffer[0xF80];      // 80h
+  #define TPM_CRB_DATA_BUFFER_SIZE    0xF80
+  uint8_t                             CrbDataBuffer[TPM_CRB_DATA_BUFFER_SIZE];      // 80h
 } ptp_crb_registers;
-#pragma pack(0)
 
-#endif	/* _TPM_PRIV_H_ */
+#pragma pack ()
+
+#endif	/* _TPM_CRB_H_ */
