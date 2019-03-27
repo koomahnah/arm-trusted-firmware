@@ -38,8 +38,10 @@
 #define MAP_NS_DRAM0	MAP_REGION_FLAT(NS_DRAM0_BASE, NS_DRAM0_SIZE,	\
 					MT_MEMORY | MT_RW | MT_NS)
 
+#if ENABLE_TPM
 #define MAP_TPM_CRB	MAP_REGION_FLAT(TPM_CRB_BASE, TPM_CRB_SIZE,	\
 					MT_MEMORY | MT_RW | MT_NS)
+#endif
 
 #define MAP_FLASH0	MAP_REGION_FLAT(QEMU_FLASH0_BASE, QEMU_FLASH0_SIZE, \
 					MT_MEMORY | MT_RO | MT_SECURE)
@@ -86,7 +88,9 @@ static const mmap_region_t plat_qemu_mmap[] = {
 #ifdef MAP_DEVICE1
 	MAP_DEVICE1,
 #endif
+#if ENABLE_TPM
 	MAP_TPM_CRB,
+#endif
 	MAP_BL32_MEM,
 	{0}
 };

@@ -23,6 +23,14 @@ ifeq ($(AARCH32_SP),optee)
 add-lib-optee 		:= 	yes
 endif
 
+# Enable firmware TPM implementation
+ENABLE_TPM		:=	0
+
+ifeq (${ENABLE_TPM},1)
+$(eval $(call add_define,ENABLE_TPM))
+BL31_SOURCES		+=	drivers/tpm/tpm.c
+endif
+
 include lib/libfdt/libfdt.mk
 
 ifeq ($(NEED_BL32),yes)
@@ -135,8 +143,6 @@ BL31_SOURCES		+=	lib/cpus/aarch64/aem_generic.S		\
 				plat/qemu/aarch64/plat_helpers.S	\
 				plat/qemu/qemu_bl31_setup.c
 endif
-
-BL31_SOURCES		+=	drivers/tpm/tpm.c
 
 # Add the build options to pack Trusted OS Extra1 and Trusted OS Extra2 images
 # in the FIP if the platform requires.
