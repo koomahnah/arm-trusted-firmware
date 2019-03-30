@@ -1,5 +1,5 @@
 #ifndef _TPM_CRB_H_
-#define _TPM_CRN_H_
+#define _TPM_CRB_H_
 
 #include <stdint.h>
 

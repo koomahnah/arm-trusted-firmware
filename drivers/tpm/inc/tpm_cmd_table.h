@@ -3,9 +3,6 @@
 
 #include "tpm_cmd.h"
 
-#define TPM_CC_FIRST 0x11f
-#define TPM_CC_LAST  0x196
-
 struct tpm_command {
 	tpm_cmd_handler handler;
 	/* 
