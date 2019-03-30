@@ -104,7 +104,7 @@ static const struct tpm_command tpm_command_table[] = {
 	{tpm_cmd_unimplemented, 0},	/* TPM_CC_VerifySignature */
 	{tpm_cmd_unimplemented, 0},	/* TPM_CC_ECC_Parameters */
 	{tpm_cmd_unimplemented, 0},	/* TPM_CC_FirmwareRead */
-	{tpm_cmd_unimplemented, 0},	/* TPM_CC_GetCapability */
+	{tpm_cmd_getcap, 0},		/* TPM_CC_GetCapability */
 	{tpm_cmd_unimplemented, 0},	/* TPM_CC_GetRandom */
 	{tpm_cmd_unimplemented, 0},	/* TPM_CC_GetTestResult */
 	{tpm_cmd_unimplemented, 0},	/* TPM_CC_Hash */

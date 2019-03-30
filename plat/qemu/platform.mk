@@ -29,7 +29,8 @@ ENABLE_TPM		:=	0
 ifeq (${ENABLE_TPM},1)
 $(eval $(call add_define,ENABLE_TPM))
 BL31_SOURCES		+=	drivers/tpm/tpm.c \
-				drivers/tpm/tpm_unimplemented.c
+				drivers/tpm/tpm_unimplemented.c \
+				drivers/tpm/tpm_getcap.c
 endif
 
 include lib/libfdt/libfdt.mk
