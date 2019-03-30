@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <string.h>
+#include <endian.h>
 
 #include <arch_helpers.h>
 #include <smccc_helpers.h>
@@ -17,13 +18,16 @@ static ptp_crb_registers *crb_regs = (ptp_crb_registers*) TPM_CRB_BASE;
 static void
 tpm_handle_cmd(void *buf) {
 	tpm2_command_header *header = (tpm2_command_header *) buf;
+	TPM_CC commandCode = be32toh(header->commandCode);
 
-	if (header->commandCode < TPM_CC_FIRST ||
-	    header->commandCode > TPM_CC_LAST) {
+	INFO("TPM command_code: %x, %x\n", commandCode, commandCode - TPM_CC_FIRST);
+
+	if (commandCode < TPM_CC_FIRST ||
+	    commandCode > TPM_CC_LAST) {
 		INFO("TPM: Command code is incorrect.\n");
 		tpm_cmd_unimplemented(buf);
 	} else {
-		tpm_command_table[header->commandCode - TPM_CC_FIRST].handler(buf);
+		tpm_command_table[commandCode - TPM_CC_FIRST].handler(buf);
 	}
 
 	/*

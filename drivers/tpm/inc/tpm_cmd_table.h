@@ -17,6 +17,7 @@ static const struct tpm_command tpm_command_table[] = {
 	{tpm_cmd_unimplemented, 0},	/* TPM_CC_EvictControl */
 	{tpm_cmd_unimplemented, 0},	/* TPM_CC_HierarchyControl */
 	{tpm_cmd_unimplemented, 0},	/* TPM_CC_NV_UndefineSpace */
+	{tpm_cmd_unimplemented, 0},	/* UNUSED */
 	{tpm_cmd_unimplemented, 0},	/* TPM_CC_ChangeEPS */
 	{tpm_cmd_unimplemented, 0},	/* TPM_CC_ChangePPS */
 	{tpm_cmd_unimplemented, 0},	/* TPM_CC_Clear */

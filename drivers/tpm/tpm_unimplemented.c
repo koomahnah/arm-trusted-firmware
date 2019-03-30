@@ -1,5 +1,6 @@
 #include <string.h>
 #include <common/debug.h> 
+#include <endian.h>
 
 #include "inc/tpm_priv.h"
 #include "inc/tpm_crb.h"
@@ -16,7 +17,7 @@ tpm_cmd_unimplemented(void *buf) {
 
 	header = (tpm2_command_header*) buf;
 
-	header->tag = TPM_ST_NO_SESSIONS;
-	header->paramSize = sizeof(tpm2_command_header);
-	header->responseCode = TPM_RC_COMMAND_CODE;
+	header->tag = htobe16(TPM_ST_NO_SESSIONS);
+	header->paramSize = htobe32(sizeof(tpm2_command_header));
+	header->responseCode = htobe32(TPM_RC_COMMAND_CODE);
 }
