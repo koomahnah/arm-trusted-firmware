@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2018, ARM Limited and Contributors. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
 #include <assert.h>
 #include <errno.h>
 #include <stdbool.h>
@@ -12,6 +18,7 @@
 #include "inc/tpm_priv.h"
 #include "inc/tpm_crb.h"
 #include "inc/tpm_cmd_table.h" 
+#include "inc/tpm_pcr.h"
 
 static ptp_crb_registers *crb_regs = (ptp_crb_registers*) TPM_CRB_BASE;
 
@@ -47,6 +54,8 @@ tpm_handle_cmd(void *buf) {
 void init_tpm() {
 
 	memset(crb_regs, 0, sizeof(crb_regs));
+	memset(PCRS_SHA256_BANK, 0, sizeof(PCRS_SHA256_BANK));
+	memset(PCRS_SHA1_BANK, 0, sizeof(PCRS_SHA1_BANK));
 
 	crb_regs->CrbControlCommandSize = TPM_CRB_DATA_BUFFER_SIZE;
 

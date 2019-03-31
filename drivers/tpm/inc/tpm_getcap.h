@@ -1,7 +1,18 @@
+/*
+ * Copyright (c) 2018, ARM Limited and Contributors. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
 #ifndef _TPM_GETCAP_H
 #define _TPM_GETCAP_H
 
 #include "tpm_priv.h"
+
+static TPM_ALG_ID PCR_SUPPORTED_HASHES[] = {
+	TPM_ALG_SHA1,
+	TPM_ALG_SHA256,
+};
 
 #pragma pack (1)
 

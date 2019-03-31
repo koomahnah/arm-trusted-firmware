@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2018, ARM Limited and Contributors. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
 #ifndef _TPM_CMD_TABLE_H_
 #define _TPM_CMD_TABLE_H_
 
@@ -112,7 +118,7 @@ static const struct tpm_command tpm_command_table[] = {
 	{tpm_cmd_unimplemented, 0},	/* TPM_CC_PolicyPCR */
 	{tpm_cmd_unimplemented, 0},	/* TPM_CC_PolicyRestart */
 	{tpm_cmd_unimplemented, 0},	/* TPM_CC_ReadClock */
-	{tpm_cmd_unimplemented, 0},	/* TPM_CC_PCR_Extend */
+	{tpm_cmd_pcr_extend, 0},	/* TPM_CC_PCR_Extend */
 	{tpm_cmd_unimplemented, 0},	/* TPM_CC_PCR_SetAuthValue */
 	{tpm_cmd_unimplemented, 0},	/* TPM_CC_NV_Certify */
 	{tpm_cmd_unimplemented, 0},	/* TPM_CC_EventSequenceComplete */

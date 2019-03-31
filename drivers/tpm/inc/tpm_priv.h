@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2018, ARM Limited and Contributors. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
 #ifndef _TPM_PRIV_H_
 #define _TPM_PRIV_H_
 

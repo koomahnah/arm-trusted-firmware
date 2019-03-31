@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2018, ARM Limited and Contributors. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
 #include <string.h>
 #include <common/debug.h> 
 #include <endian.h>
@@ -13,6 +19,10 @@
 static void
 tpm_getcap_pcrs(uint32_t property, uint32_t propertyCount, tpm2_getcap_response *response) {
 	TPML_PCR_SELECTION *pcrs = &response->capabilityData.data.assignedPCR;
+	TPMS_PCR_SELECTION *selection;
+	int count = sizeof(PCR_SUPPORTED_HASHES) / sizeof(TPM_ALG_ID);
+	int selection_size = sizeof(TPMI_ALG_HASH) + sizeof(uint8_t) + 3 * sizeof(BYTE);
+	
 
 	response->header.tag = htobe16(TPM_ST_NO_SESSIONS);
 	if (property != 0) {
@@ -26,20 +36,24 @@ tpm_getcap_pcrs(uint32_t property, uint32_t propertyCount, tpm2_getcap_response 
 			sizeof(TPMI_YES_NO) +
 			sizeof(TPM_CAP) + 
 			sizeof(UINT32) +
-			sizeof(TPMI_ALG_HASH) + 
-			sizeof(UINT8) +
-			3 * sizeof(BYTE));
+			count * selection_size);
 	response->header.responseCode = htobe32(TPM_RC_SUCCESS);
 
 	response->moreData = FALSE;
 	response->capabilityData.capability = htobe32(TPM_CAP_PCRS);
-	pcrs->count = htobe32(1);
-	pcrs->pcrSelections[0].hash = htobe16(TPM_ALG_SHA256);
-	pcrs->pcrSelections[0].sizeofSelect = 3;
-	pcrs->pcrSelections[0].pcrSelect[0] = 0xff;
-	pcrs->pcrSelections[0].pcrSelect[1] = 0xff;
-	pcrs->pcrSelections[0].pcrSelect[2] = 0xff;
+	pcrs->count = htobe32(count);
 
+	selection = &pcrs->pcrSelections[0];
+
+	/* For each algorithm we support 24 PCRS. */
+	while (count--) {
+		selection->hash = htobe16(PCR_SUPPORTED_HASHES[count]);
+		selection->sizeofSelect = 3;
+		selection->pcrSelect[0] = 0xff;
+		selection->pcrSelect[1] = 0xff;
+		selection->pcrSelect[2] = 0xff;
+		selection = (TPMS_PCR_SELECTION*)(((uint8_t*)selection) + selection_size);
+	}
 }
 
 void
