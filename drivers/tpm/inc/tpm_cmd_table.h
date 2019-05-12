@@ -55,7 +55,7 @@ static const struct tpm_command tpm_command_table[] = {
 	{tpm_cmd_unimplemented, 0},	/* TPM_CC_SetCommandCodeAuditStatus */
 	{tpm_cmd_unimplemented, 0},	/* TPM_CC_FieldUpgradeData */
 	{tpm_cmd_unimplemented, 0},	/* TPM_CC_IncrementalSelfTest */
-	{tpm_cmd_unimplemented, 0},	/* TPM_CC_SelfTest */
+	{tpm_cmd_self_test, 0},	/* TPM_CC_SelfTest */
 	{tpm_cmd_unimplemented, 0},	/* TPM_CC_Startup */
 	{tpm_cmd_unimplemented, 0},	/* TPM_CC_Shutdown */
 	{tpm_cmd_unimplemented, 0},	/* TPM_CC_StirRandom */

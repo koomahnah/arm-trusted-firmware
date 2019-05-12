@@ -34,7 +34,8 @@ include drivers/auth/mbedtls/mbedtls_crypto.mk
 BL31_SOURCES		+=	drivers/tpm/tpm.c \
 				drivers/tpm/tpm_unimplemented.c \
 				drivers/tpm/tpm_getcap.c \
-				drivers/tpm/tpm_pcr.c
+				drivers/tpm/tpm_pcr.c \
+				drivers/tpm/tpm_self_test.c
 endif
 
 include lib/libfdt/libfdt.mk

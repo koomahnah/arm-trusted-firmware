@@ -12,5 +12,6 @@ typedef void (*tpm_cmd_handler)(void *);
 void tpm_cmd_unimplemented(void *buf);
 void tpm_cmd_getcap(void *buf);
 void tpm_cmd_pcr_extend(void *buf);
+void tpm_cmd_self_test(void *buf);
 
 #endif	/* _TPM_CMD_H_ */
