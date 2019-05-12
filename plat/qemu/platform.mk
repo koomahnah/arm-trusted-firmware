@@ -24,7 +24,7 @@ add-lib-optee 		:= 	yes
 endif
 
 # Enable firmware TPM implementation
-ENABLE_TPM		:=	0
+ENABLE_TPM		:=	1
 
 ifeq (${ENABLE_TPM},1)
 $(eval $(call add_define,ENABLE_TPM))
