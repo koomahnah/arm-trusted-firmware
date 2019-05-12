@@ -72,8 +72,7 @@ typedef struct {
   ///
   /// Command buffer start address
   ///
-  uint32_t                            CrbControlCommandAddressLow;   // 5Ch
-  uint32_t                            CrbControlCommandAddressHigh;  // 60h
+  uint64_t                            CrbControlCommandAddress;   // 5Ch
   ///
   /// Size of the Response buffer
   ///
@@ -81,7 +80,7 @@ typedef struct {
   ///
   /// Address of the start of the Response buffer
   ///
-  uint64_t                            CrbControlResponseAddrss;  // 68h
+  uint64_t                            CrbControlResponseAddress;  // 68h
   uint8_t                             Reserved4[0x10];           // 70h
   ///
   /// Command/Response Data may be defined as large as 3968 (0xF80).

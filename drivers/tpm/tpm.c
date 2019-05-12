@@ -31,7 +31,7 @@ tpm_handle_cmd(void *buf) {
 
 	if (commandCode < TPM_CC_FIRST ||
 	    commandCode > TPM_CC_LAST) {
-		INFO("TPM: Command code is incorrect.\n");
+		ERROR("TPM: Command code is incorrect.\n");
 		tpm_cmd_unimplemented(buf);
 	} else {
 		tpm_command_table[commandCode - TPM_CC_FIRST].handler(buf);
@@ -57,7 +57,11 @@ void init_tpm() {
 	memset(PCRS_SHA256_BANK, 0, sizeof(PCRS_SHA256_BANK));
 	memset(PCRS_SHA1_BANK, 0, sizeof(PCRS_SHA1_BANK));
 
+	crb_regs->CrbControlResponseSize = TPM_CRB_DATA_BUFFER_SIZE;
 	crb_regs->CrbControlCommandSize = TPM_CRB_DATA_BUFFER_SIZE;
+	crb_regs->CrbControlCommandAddress = (uint64_t) crb_regs->CrbDataBuffer;
+	crb_regs->CrbControlResponseAddress = (uint64_t) crb_regs->CrbDataBuffer;
+
 
 	/* 
 	 * We don't really implement localities ATM.
