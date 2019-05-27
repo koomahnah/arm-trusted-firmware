@@ -14,14 +14,13 @@
 
 void
 tpm_cmd_unimplemented(void *buf) {
-	tpm2_command_header *header;
+	tpm2_command_header *header = (tpm2_command_header *) buf;
+	TPM_CC commandCode = be32toh(header->commandCode);
 
-	INFO("TPM: Request for an unimplemented command.\n");
+	ERROR("TPM: Request for an unimplemented command 0x%x.\n", commandCode);
 
 	/* Purge buffer to make space for response. */
 	memset (buf, 0, TPM_CRB_DATA_BUFFER_SIZE);
-
-	header = (tpm2_command_header*) buf;
 
 	header->tag = htobe16(TPM_ST_NO_SESSIONS);
 	header->paramSize = htobe32(sizeof(tpm2_command_header));
