@@ -17,7 +17,7 @@
 
 #include "inc/tpm_priv.h"
 #include "inc/tpm_crb.h"
-#include "inc/tpm_cmd_table.h" 
+#include "inc/tpm_cmd.h"
 #include "inc/tpm_pcr.h"
 
 static ptp_crb_registers *crb_regs = (ptp_crb_registers*) TPM_CRB_BASE;

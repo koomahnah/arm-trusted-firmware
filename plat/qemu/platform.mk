@@ -35,7 +35,8 @@ BL31_SOURCES		+=	drivers/tpm/tpm.c \
 				drivers/tpm/tpm_unimplemented.c \
 				drivers/tpm/tpm_getcap.c \
 				drivers/tpm/tpm_pcr.c \
-				drivers/tpm/tpm_self_test.c
+				drivers/tpm/tpm_self_test.c \
+				drivers/tpm/tpm_commands.c
 endif
 
 include lib/libfdt/libfdt.mk

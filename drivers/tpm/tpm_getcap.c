@@ -7,10 +7,93 @@
 #include <string.h>
 #include <common/debug.h> 
 #include <endian.h>
+#include <assert.h>
 
 #include "inc/tpm_priv.h"
 #include "inc/tpm_getcap.h"
 #include "inc/tpm_cmd.h"
+
+static int
+tpm_count_implemented()
+{
+	int i, sum = 0;
+
+	for (i = 0; i < tpm_cmd_count; i++)
+		if (tpm_command_table[i].handler != tpm_cmd_unimplemented)
+			sum++;
+
+	return sum;
+}
+
+static void
+tpm_getcap_commands(uint32_t property, uint32_t propertyCount,
+    tpm2_getcap_response *response)
+{
+	response->header.tag = htobe16(TPM_ST_NO_SESSIONS);
+	int i, rsp_idx;
+
+	INFO("TPM: GetCapability commands request\n");
+
+	if (propertyCount != tpm_count_implemented() || 1) {
+		response->header.paramSize = htobe32(sizeof(tpm2_command_header));
+		response->header.responseCode = htobe32(TPM_RC_COMMAND_CODE);
+		return;
+	}
+
+	response->capabilityData.capability = htobe32(TPM_CAP_COMMANDS);
+	response->capabilityData.data.command.count = htobe32(propertyCount);
+	response->moreData = 0;
+
+	for (rsp_idx = 0, i = 0; i < tpm_cmd_count; i++)
+		if (tpm_command_table[i].handler != tpm_cmd_unimplemented) {
+			response->capabilityData.data.command.commandAttributes[rsp_idx] =
+				tpm_command_table[i].attributes;
+		}
+	assert(rsp_idx == propertyCount);
+
+	response->header.paramSize = htobe32(
+			sizeof(tpm2_command_header) +
+			sizeof(TPMI_YES_NO) +
+			sizeof(TPM_CAP) +
+			propertyCount * sizeof(TPML_CCA));
+	response->header.responseCode = htobe32(TPM_RC_SUCCESS);
+}
+
+static void
+tpm_getcap_properties(uint32_t property, uint32_t propertyCount,
+    tpm2_getcap_response *response)
+{
+
+	response->header.tag = htobe16(TPM_ST_NO_SESSIONS);
+	response->capabilityData.capability = htobe32(TPM_CAP_TPM_PROPERTIES);
+	response->capabilityData.data.tpmProperties.count = 1;
+	response->moreData = 0;
+
+	INFO("TPM: GetCapability properties request\n");
+
+	switch (property) {
+	case TPM_PT_TOTAL_COMMANDS:
+		response->capabilityData.data.tpmProperties.tpmProperty[0].property =
+			htobe32(TPM_PT_TOTAL_COMMANDS);
+		response->capabilityData.data.tpmProperties.tpmProperty[0].value =
+			htobe32(tpm_count_implemented());
+		break;
+	default:
+		response->header.paramSize = htobe32(sizeof(tpm2_command_header));
+		response->header.responseCode = htobe32(TPM_RC_COMMAND_CODE);
+		return;
+	}
+
+	response->header.paramSize = htobe32(
+			sizeof(tpm2_command_header) +
+			sizeof(TPMI_YES_NO) +
+			sizeof(TPM_CAP) +
+			sizeof(UINT32) +
+			sizeof(TPMS_TAGGED_PROPERTY));
+	response->header.responseCode = htobe32(TPM_RC_SUCCESS);
+
+	response->moreData = FALSE;
+}
 
 /*
  * Return PCRs description including supported hash algorithm.
@@ -77,6 +160,8 @@ tpm_cmd_getcap(void *buf) {
 	case TPM_CAP_ALGS:
 	case TPM_CAP_HANDLES:
 	case TPM_CAP_COMMANDS:
+		tpm_getcap_commands(property, propertyCount, buf);
+		break;
 	case TPM_CAP_PP_COMMANDS:
 	case TPM_CAP_AUDIT_COMMANDS:
 		tpm_cmd_unimplemented(buf);
@@ -85,6 +170,8 @@ tpm_cmd_getcap(void *buf) {
 		tpm_getcap_pcrs(property, propertyCount, buf);
 		break;
 	case TPM_CAP_TPM_PROPERTIES:
+		tpm_getcap_properties(property, propertyCount, buf);
+		break;
 	case TPM_CAP_PCR_PROPERTIES:
 	case TPM_CAP_ECC_CURVES:
 	case TPM_CAP_AUTH_POLICIES:
