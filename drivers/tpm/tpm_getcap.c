@@ -16,13 +16,17 @@
 static int
 tpm_count_implemented()
 {
+#if 0
 	int i, sum = 0;
+
 
 	for (i = 0; i < tpm_cmd_count; i++)
 		if (tpm_command_table[i].handler != tpm_cmd_unimplemented)
 			sum++;
 
 	return sum;
+#endif
+	return 0x5b;
 }
 
 static void
@@ -34,28 +38,33 @@ tpm_getcap_commands(uint32_t property, uint32_t propertyCount,
 
 	INFO("TPM: GetCapability commands request\n");
 
+#if 0
 	if (propertyCount != tpm_count_implemented() || 1) {
 		response->header.paramSize = htobe32(sizeof(tpm2_command_header));
 		response->header.responseCode = htobe32(TPM_RC_COMMAND_CODE);
 		return;
 	}
+#endif
 
 	response->capabilityData.capability = htobe32(TPM_CAP_COMMANDS);
 	response->capabilityData.data.command.count = htobe32(propertyCount);
-	response->moreData = 0;
+	response->moreData = (property + propertyCount < tpm_cmd_count);
 
-	for (rsp_idx = 0, i = 0; i < tpm_cmd_count; i++)
-		if (tpm_command_table[i].handler != tpm_cmd_unimplemented) {
-			response->capabilityData.data.command.commandAttributes[rsp_idx] =
-				tpm_command_table[i].attributes;
-		}
-	assert(rsp_idx == propertyCount);
+	property -= TPM_CC_FIRST;
+
+	for (rsp_idx = 0, i = property; i < tpm_cmd_count && rsp_idx < propertyCount; i++)
+		response->capabilityData.data.command.commandAttributes[rsp_idx++] =
+			tpm_command_table[i].attributes;
+
+	INFO("RSP_IDX: %d\n", rsp_idx);
+	response->capabilityData.data.command.count = htobe32(rsp_idx);
 
 	response->header.paramSize = htobe32(
 			sizeof(tpm2_command_header) +
 			sizeof(TPMI_YES_NO) +
 			sizeof(TPM_CAP) +
-			propertyCount * sizeof(TPML_CCA));
+			sizeof(UINT32) + //command.count
+			rsp_idx * sizeof(TPMA_CC)); //command.commandAttributes
 	response->header.responseCode = htobe32(TPM_RC_SUCCESS);
 }
 
@@ -66,7 +75,7 @@ tpm_getcap_properties(uint32_t property, uint32_t propertyCount,
 
 	response->header.tag = htobe16(TPM_ST_NO_SESSIONS);
 	response->capabilityData.capability = htobe32(TPM_CAP_TPM_PROPERTIES);
-	response->capabilityData.data.tpmProperties.count = 1;
+	response->capabilityData.data.tpmProperties.count = htobe32(1);
 	response->moreData = 0;
 
 	INFO("TPM: GetCapability properties request\n");
@@ -92,7 +101,6 @@ tpm_getcap_properties(uint32_t property, uint32_t propertyCount,
 			sizeof(TPMS_TAGGED_PROPERTY));
 	response->header.responseCode = htobe32(TPM_RC_SUCCESS);
 
-	response->moreData = FALSE;
 }
 
 /*
