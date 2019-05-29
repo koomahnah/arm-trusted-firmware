@@ -43,11 +43,15 @@ tpm_handle_cmd(void *buf) {
 	 */
 	crb_regs->CrbControlStart = 0;
 
+	INFO("TPM: Response size: %u\n", be32toh(header->paramSize));
+
 	/* Dump response. */
-	INFO("TPM: Dumping response.\n");
-	for (int i = 0; i < be32toh(header->paramSize); i++)
-		printf("%02x", ((char*)buf)[i]);
-	printf("\n");
+	if (be32toh(header->paramSize) < 64) {
+		INFO("TPM: Dumping response.\n");
+		for (int i = 0; i < be32toh(header->paramSize); i++)
+			printf("%02x", ((char*)buf)[i]);
+		printf("\n");
+	}
 }
 
 /* Define pointer types used to access CRB registers on PTP */
