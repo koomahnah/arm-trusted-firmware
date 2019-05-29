@@ -36,7 +36,8 @@ BL31_SOURCES		+=	drivers/tpm/tpm.c \
 				drivers/tpm/tpm_getcap.c \
 				drivers/tpm/tpm_pcr.c \
 				drivers/tpm/tpm_self_test.c \
-				drivers/tpm/tpm_commands.c
+				drivers/tpm/tpm_commands.c \
+				${MBEDTLS_SOURCES}
 endif
 
 include lib/libfdt/libfdt.mk

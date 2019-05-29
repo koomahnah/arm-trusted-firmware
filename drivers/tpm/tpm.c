@@ -14,6 +14,7 @@
 #include <smccc_helpers.h>
 #include <common/debug.h>
 #include <drivers/tpm.h>
+#include <drivers/auth/mbedtls/mbedtls_common.h>
 
 #include "inc/tpm_priv.h"
 #include "inc/tpm_crb.h"
@@ -73,6 +74,9 @@ void init_tpm() {
 	 * whatever locality they want instantly.
 	 */
 	crb_regs->LocalityStatus = 1;
+
+	mbedtls_init();
+
 }
 
 uintptr_t tpm_smc_handler(void *handle) {

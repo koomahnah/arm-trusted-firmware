@@ -40,19 +40,19 @@ tpm_pcr_read_bank(TPMS_PCR_SELECTION *selection, TPM2B_DIGEST *response, uint32_
 	if (selection->sizeofSelect > 3)
 		return TPM_RC_VALUE;
 
-	response_size = 0;
+	*response_size = 0;
 
 	for (uint8_t i = 0; i < selection->sizeofSelect; i++) {
 		uint8_t pcr_mask = selection->pcrSelect[i];
 
 		for (uint8_t j = 0; j < 8; j++)
-			if ((pcr_mask & (1 << j)) == 1) {
+			if ((pcr_mask & (1 << j)) != 0) {
 				if (hash == TPM_ALG_SHA256) {
 					response->t.size = htobe16(SHA256_DIGEST_SIZE);
 					memcpy(response->t.buffer, PCRS_SHA256_BANK[8*i + j], SHA256_DIGEST_SIZE);
 					response = (TPM2B_DIGEST*)(((uint8_t*)response) + sizeof(uint16_t) + SHA256_DIGEST_SIZE);
-					(*response_size) += sizeof(uint16_t) + SHA256_DIGEST_SIZE;
-					(*digest_count)++;
+					*response_size += sizeof(uint16_t) + SHA256_DIGEST_SIZE;
+					*digest_count = *digest_count + 1;
 				} else {
 					response->t.size = htobe16(SHA1_DIGEST_SIZE);
 					memcpy(response->t.buffer, PCRS_SHA1_BANK[8*i + j], SHA1_DIGEST_SIZE);
@@ -63,13 +63,14 @@ tpm_pcr_read_bank(TPMS_PCR_SELECTION *selection, TPM2B_DIGEST *response, uint32_
 			}
 	}
 
+
 	return TPM_RC_SUCCESS;
 }
 
 void
 tpm_cmd_pcr_read(void *buf) {
 	tpm2_response_pcr_read *resp = (tpm2_response_pcr_read*)buf;
-	uint8_t *raw_command = (uint8_t*)buf;
+	uint8_t *digests_ptr = (uint8_t*)buf;
 	uint32_t *digest_count;
 	uint32_t response_size;
 	TPMS_PCR_SELECTION *selection;
@@ -82,36 +83,38 @@ tpm_cmd_pcr_read(void *buf) {
 	 */
 	memmove(buf + sizeof(tpm2_command_header) + sizeof(uint32_t),
 		buf + sizeof(tpm2_command_header),
-		resp->header.commandSize - sizeof(tpm2_command_header));
+		be32toh(resp->header.commandSize) - sizeof(tpm2_command_header));
 	resp->pcrUpdateCounter = htobe32(pcrUpdateCounter);
 
 	/* 
 	 * Move pointer to where the hash will be put.
 	 * Reserve 4 bytes for the count of returned digests.
 	 */
-	raw_command += resp->header.commandSize + sizeof(uint32_t);
-	digest_count = (uint32_t*)raw_command;
-	raw_command += sizeof(uint32_t);
 	selection = &resp->pcrSelection.pcrSelections[0];
 	response_size = 0;
+	digests_ptr += be32toh(resp->header.commandSize) + sizeof(uint32_t);
 	resp->header.responseSize = htobe32(be32toh(resp->header.responseSize) + 2*sizeof(uint32_t));
+	
+	digest_count = (uint32_t*)digests_ptr;
+	digests_ptr += sizeof(uint32_t);
+	*digest_count = 0;
 
-	for (uint32_t i = 0; i < resp->pcrSelection.count; i++) {
-		rc = tpm_pcr_read_bank(selection, (TPM2B_DIGEST*)raw_command, &response_size, digest_count);
+	for (uint32_t i = 0; i < htobe32(resp->pcrSelection.count); i++) {
+		rc = tpm_pcr_read_bank(selection, (TPM2B_DIGEST*)digests_ptr, &response_size, digest_count);
 		if (rc != TPM_RC_SUCCESS)
 			goto fail;
 
-		raw_command += response_size;
+
+		digests_ptr += response_size;
 		resp->header.responseSize = htobe32(be32toh(resp->header.responseSize) + response_size);
 		selection = (TPMS_PCR_SELECTION*)(((uint8_t*)selection) +
 				sizeof(TPMI_ALG_HASH) +
 				sizeof(uint8_t) +
-				selection->sizeofSelect * sizeof(uint8_t)
+				selection->sizeofSelect
 				);
 	}
 
 	*digest_count = htobe32(*digest_count);
-
 	resp->header.tag = htobe16(TPM_ST_NO_SESSIONS);
 	resp->header.responseCode = htobe32(TPM_RC_SUCCESS);
 	return;
@@ -124,22 +127,55 @@ fail:
 void
 tpm_pcr_extend_bank(TPM_ALG_ID digest_id, void *data, TPMI_DH_PCR handle) {
 	mbedtls_md_context_t ctx;
+	int rc;
 
 	mbedtls_md_init(&ctx);
 
 	if (digest_id == TPM_ALG_SHA256) {
-		mbedtls_md_setup(&ctx, mbedtls_md_info_from_type(MBEDTLS_MD_SHA256), 0);
-		mbedtls_md_starts(&ctx);
-		mbedtls_md_update(&ctx, PCRS_SHA256_BANK[handle], SHA256_DIGEST_SIZE);
-		mbedtls_md_update(&ctx, data, SHA256_DIGEST_SIZE);
-		mbedtls_md_finish(&ctx, PCRS_SHA256_BANK[handle]);
+		rc = mbedtls_md_setup(&ctx, mbedtls_md_info_from_type(MBEDTLS_MD_SHA256), 0);
+		if (rc != 0) {
+			printf("%s: MBEDTLS failed with %d at %u\n", __func__, rc, __LINE__);
+		}
+		rc = mbedtls_md_starts(&ctx);
+		if (rc != 0) {
+			printf("%s: MBEDTLS failed with %d at %u\n", __func__, rc, __LINE__);
+		}
+		rc = mbedtls_md_update(&ctx, PCRS_SHA256_BANK[handle], SHA256_DIGEST_SIZE);
+		if (rc != 0) {
+			printf("%s: MBEDTLS failed with %d at %u\n", __func__, rc, __LINE__);
+		}
+		rc = mbedtls_md_update(&ctx, data, SHA256_DIGEST_SIZE);
+		if (rc != 0) {
+			printf("%s: MBEDTLS failed with %d at %u\n", __func__, rc, __LINE__);
+		}
+		rc = mbedtls_md_finish(&ctx, PCRS_SHA256_BANK[handle]);
+		if (rc != 0) {
+			printf("%s: MBEDTLS failed with %d at %u\n", __func__, rc, __LINE__);
+		}
 	} else {
-		mbedtls_md_starts(&ctx);
-		mbedtls_md_setup(&ctx, mbedtls_md_info_from_type(MBEDTLS_MD_SHA1), 0);
-		mbedtls_md_update(&ctx, PCRS_SHA1_BANK[handle], SHA1_DIGEST_SIZE);
-		mbedtls_md_update(&ctx, data, SHA1_DIGEST_SIZE);
-		mbedtls_md_finish(&ctx, PCRS_SHA1_BANK[handle]);
+		rc = mbedtls_md_setup(&ctx, mbedtls_md_info_from_type(MBEDTLS_MD_SHA1), 0);
+		if (rc != 0) {
+			printf("%s: MBEDTLS failed with %d at %u\n", __func__, rc, __LINE__);
+		}
+		rc = mbedtls_md_starts(&ctx);
+		if (rc != 0) {
+			printf("%s: MBEDTLS failed with %d at %u\n", __func__, rc, __LINE__);
+		}
+		rc = mbedtls_md_update(&ctx, PCRS_SHA1_BANK[handle], SHA1_DIGEST_SIZE);
+		if (rc != 0) {
+			printf("%s: MBEDTLS failed with %d at %u\n", __func__, rc, __LINE__);
+		}
+		rc = mbedtls_md_update(&ctx, data, SHA1_DIGEST_SIZE);
+		if (rc != 0) {
+			printf("%s: MBEDTLS failed with %d at %u\n", __func__, rc, __LINE__);
+		}
+		rc = mbedtls_md_finish(&ctx, PCRS_SHA1_BANK[handle]);
+		if (rc != 0) {
+			printf("%s: MBEDTLS failed with %d at %u\n", __func__, rc, __LINE__);
+		}
 	}
+
+	mbedtls_md_free(&ctx);
 
 }
 
