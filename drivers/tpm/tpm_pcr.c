@@ -19,6 +19,8 @@ TPM_PCR_SHA256_BANK PCRS_SHA256_BANK[IMPLEMENTATION_PCR];
 TPM_PCR_SHA1_BANK   PCRS_SHA1_BANK[IMPLEMENTATION_PCR];
 static uint32_t pcrUpdateCounter = 0;
 
+static char auth_response[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00};
+
 /* 
  * Process PCR selection.
  * If selection is incorrect the command will fail
@@ -171,7 +173,9 @@ tpm_cmd_pcr_extend(void *buf) {
 		    digest_id != TPM_ALG_SHA1) {
 			INFO("TPM: unsupported Hash algorithm: 0x%x\n", be16toh(digest->hashAlg));
 			cmd->header.responseCode = htobe32(TPM_RC_HASH);
-			goto end;
+			cmd->header.tag = htobe16(TPM_ST_NO_SESSIONS);
+			cmd->header.responseSize = sizeof(tpm2_command_header);
+			return;
 		}
 		if (digest_id == TPM_ALG_SHA256)
 			digest = (TPMT_HA*)(((uint8_t*)digest) + sizeof(TPM_ALG_ID) + SHA256_DIGEST_SIZE);
@@ -209,6 +213,7 @@ tpm_cmd_pcr_extend(void *buf) {
 	pcrUpdateCounter++;
 
 end:
-	cmd->header.tag = htobe16(TPM_ST_NO_SESSIONS);
-	cmd->header.responseSize = htobe32(sizeof(tpm2_command_header));
+	cmd->header.tag = htobe16(TPM_ST_SESSIONS);
+	cmd->header.responseSize = htobe32(sizeof(tpm2_command_header) + sizeof(auth_response));
+	memcpy(buf + sizeof(tpm2_command_header), auth_response, sizeof(auth_response));
 }
