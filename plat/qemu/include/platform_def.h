@@ -70,7 +70,7 @@
  * and secure DRAM.
  */
 #define SEC_ROM_BASE			0x00000000
-#define SEC_ROM_SIZE			0x00020000
+#define SEC_ROM_SIZE			0x00030000
 
 #define NS_DRAM0_BASE			0x40000000
 #define NS_DRAM0_SIZE			0x3de00000
@@ -138,7 +138,7 @@
  * Put BL3-1 at the top of the Trusted SRAM. BL31_BASE is calculated using the
  * current BL3-1 debug size plus a little space for growth.
  */
-#define BL31_BASE			(BL31_LIMIT - 0x20000)
+#define BL31_BASE			(BL31_LIMIT - 0x30000)
 #define BL31_LIMIT			(BL_RAM_BASE + BL_RAM_SIZE)
 #define BL31_PROGBITS_LIMIT		BL1_RW_BASE
 
