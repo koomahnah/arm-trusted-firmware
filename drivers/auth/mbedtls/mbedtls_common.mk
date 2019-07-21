@@ -46,6 +46,10 @@ LIBMBEDTLS_SRCS		:= $(addprefix ${MBEDTLS_DIR}/library/,	\
 					rsa_internal.c				\
 					x509.c 					\
 					x509_crt.c 				\
+					aes.c 					\
+					entropy.c 				\
+					ctr_drbg.c 				\
+					entropy_poll.c				\
 					)
 
 # The platform may define the variable 'TF_MBEDTLS_KEY_ALG' to select the key

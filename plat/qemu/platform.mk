@@ -37,6 +37,7 @@ BL31_SOURCES		+=	drivers/tpm/tpm.c \
 				drivers/tpm/tpm_pcr.c \
 				drivers/tpm/tpm_self_test.c \
 				drivers/tpm/tpm_commands.c \
+				drivers/tpm/tpm_rng.c \
 				${MBEDTLS_SOURCES}
 endif
 

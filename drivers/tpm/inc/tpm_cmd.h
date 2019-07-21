@@ -16,6 +16,8 @@ void tpm_cmd_getcap(void *buf);
 void tpm_cmd_pcr_extend(void *buf);
 void tpm_cmd_pcr_read(void *buf);
 void tpm_cmd_self_test(void *buf);
+void tpm_cmd_getrandom(void *buf);
+void tpm_cmd_stirrandom(void *buf);
 
 struct tpm_command {
 	tpm_cmd_handler handler;
